@@ -91,27 +91,29 @@ func main() {
 		}
 	}
 	if len(os.Args) > 2 {
-		n, err := strconv.Atoi(os.Args[2])
-		if err != nil {
-			fmt.Println("strconv error:", err)
-			return
-		}
-		if n > 0 {
-			sleepTime = n
+		if os.Args[2] != "-" {
+			n, err := strconv.Atoi(os.Args[2])
+			if err != nil {
+				fmt.Println("strconv error:", err)
+				os.Exit(1)
+			}
+			if n > 0 {
+				sleepTime = n
+			}
 		}
 	}
 
 	err := dht.HostInit()
 	if err != nil {
 		fmt.Println("HostInit error:", err)
-		return
+		os.Exit(1)
 	}
 
 	//dht2, err := dht.NewDHT("GPIO19", dht.Fahrenheit, "")
 	dht2, err := dht.NewDHT(pin, dht.Fahrenheit, "")
 	if err != nil {
 		fmt.Println("NewDHT error:", err)
-		return
+		os.Exit(1)
 	}
 
 	stop := make(chan struct{})
@@ -122,11 +124,15 @@ func main() {
 	// get sensor reading every 20 seconds in background
 	go dht2.ReadBackground(&humidity, &temperature, 20*time.Second, stop, stopped)
 
-	// should have at least read the sensor twice after 30 seconds
-	time.Sleep(time.Duration(sleepTime) * time.Second)
+	for {
 
-	fmt.Printf("humidity: %v\n", humidity)
-	fmt.Printf("temperature: %v\n", temperature)
+		// should have at least read the sensor twice after 30 seconds
+		time.Sleep(time.Duration(sleepTime) * time.Second)
+
+		fmt.Printf("humidity: %v\n", humidity)
+		fmt.Printf("temperature: %v\n", temperature)
+
+	}
 
 	// to stop ReadBackground after done with reading, close the stop channel
 	close(stop)
