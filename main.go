@@ -51,7 +51,7 @@ import (
 	"github.com/MichaelS11/go-dht"
 )
 
-func main1() {
+/*func main1() {
 	fmt.Println("init ...")
 	err := dht.HostInit()
 	if err != nil {
@@ -77,7 +77,7 @@ func main1() {
 
 	fmt.Printf("humidity: %v\n", humidity)
 	fmt.Printf("temperature: %v\n", temperature)
-}
+}*/
 
 func main() {
 
@@ -135,7 +135,7 @@ func main() {
 	<-stopped
 }
 
-func main3() {
+/*func main3() {
 	err := dht.HostInit()
 	if err != nil {
 		fmt.Println("HostInit error:", err)
@@ -156,4 +156,4 @@ func main3() {
 
 	fmt.Printf("humidity: %v\n", humidity)
 	fmt.Printf("temperature: %v\n", temperature)
-}
+}*/
