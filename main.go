@@ -110,7 +110,8 @@ func main() {
 	}
 
 	//dht2, err := dht.NewDHT("GPIO19", dht.Fahrenheit, "")
-	dht2, err := dht.NewDHT(pin, dht.Fahrenheit, "")
+	//dht2, err := dht.NewDHT(pin, dht.Fahrenheit, "")
+	dht2, err := dht.NewDHT(pin, dht.Celsius, "")
 	if err != nil {
 		fmt.Println("NewDHT error:", err)
 		os.Exit(1)
