@@ -7,3 +7,6 @@ set GOARM=5
 go build -o out/gotemp
 ```
 
+ou àvec just
+`just build`
+
