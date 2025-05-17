@@ -49,6 +49,12 @@ import (
 	//"github.com/d2r2/go-dht"
 
 	"github.com/MichaelS11/go-dht"
+
+	"net/http"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 /*func main1() {
@@ -78,6 +84,53 @@ import (
 	fmt.Printf("humidity: %v\n", humidity)
 	fmt.Printf("temperature: %v\n", temperature)
 }*/
+
+func recordMetrics() {
+	go func() {
+		for {
+			opsProcessed.Inc()
+			time.Sleep(2 * time.Second)
+		}
+	}()
+}
+
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "myapp_processed_ops_total",
+		Help: "The total number of processed events",
+	})
+	temp = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "temperature",
+		Subsystem: "temperature",
+		Name:      "temperature",
+		Help:      "La temperature",
+	})
+	humidite = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "humidite",
+		Subsystem: "humidite",
+		Name:      "humidite",
+		Help:      "L'humidite",
+	})
+)
+
+func temperatureMetrics(sleepTime int, humidity *float64, temperature *float64) {
+	go func() {
+		for {
+
+			// should have at least read the sensor twice after 30 seconds
+			time.Sleep(time.Duration(sleepTime) * time.Second)
+
+			fmt.Printf("humidity: %v\n", *humidity)
+			fmt.Printf("temperature: %v\n", *temperature)
+
+			temp.Set(*temperature)
+
+			humidite.Set(*humidity)
+
+		}
+
+	}()
+}
 
 func main() {
 
@@ -125,14 +178,15 @@ func main() {
 	// get sensor reading every 20 seconds in background
 	go dht2.ReadBackground(&humidity, &temperature, 20*time.Second, stop, stopped)
 
-	for {
+	recordMetrics()
 
-		// should have at least read the sensor twice after 30 seconds
-		time.Sleep(time.Duration(sleepTime) * time.Second)
+	temperatureMetrics(sleepTime, &humidity, &temperature)
 
-		fmt.Printf("humidity: %v\n", humidity)
-		fmt.Printf("temperature: %v\n", temperature)
-
+	http.Handle("/metrics", promhttp.Handler())
+	err = http.ListenAndServe(":2112", nil)
+	if err != nil {
+		fmt.Println("error for open server:", err)
+		os.Exit(1)
 	}
 
 	// to stop ReadBackground after done with reading, close the stop channel
