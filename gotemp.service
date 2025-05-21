@@ -1,0 +1,17 @@
+[Unit]
+Description==Recuperation de la temperature
+After=network.target
+
+[Service]
+Type=simple
+#Type=forking
+#EnvironmentFile=/etc/sysconfig/sshd
+ExecStart=/usr/rep/gotemp
+#Restart= always
+User=myuser
+KillMode=mixed
+WorkingDirectory=/usr/rep
+
+
+[Install]
+WantedBy=multi-user.target
